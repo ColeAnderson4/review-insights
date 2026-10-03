@@ -22,12 +22,14 @@ This guide is used for two things: hand-labeling the 100-review test set, and wr
 | `notifications` | Push notifications and alerts (missing, too many, or wrong) | "Never get notified when my schedule changes" |
 | `support` | Customer service, help desk, employer or HR admin issues | "Support never responded" |
 | `positive_general` | General praise with no specific feature mentioned | "Great app, works fine" |
+| `negative_general` | General complaint with no specific feature mentioned | "Terrible app" |
 | `other` | Doesn't fit any theme above, or isn't understandable | "ok" |
 
 **Tie-breaker rules**
 - A crash that happens *while clocking in* goes under `timekeeping`, because the user's goal is the more useful signal for a PM.
 - "Can't log in, so I can't see my pay" goes under `login_auth`, because the login is the root cause.
 - Praise that names a specific feature goes under that feature's theme with positive sentiment, not under `positive_general`.
+- If a vague complaint also names a specific feature (e.g., "terrible app, keeps logging me out"), use that feature's theme, not `negative_general`.
 
 ## Sentiment
 
