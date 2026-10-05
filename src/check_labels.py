@@ -27,6 +27,7 @@ THEMES = [
     "performance",
     "ui_navigation",
     "notifications",
+    "messaging_feed",
     "support",
     "positive_general",
     "negative_general",

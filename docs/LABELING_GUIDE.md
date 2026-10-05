@@ -6,8 +6,7 @@ This guide is used for two things: hand-labeling the 100-review test set, and wr
 
 1. Choose 100 reviews **at random**: 50 per app, each with `df.sample(50, random_state=42)`, then shuffled so the apps are mixed. `src/make_label_sample.py` does this. Do not hand-pick them.
 2. Label all 100 **before** you look at the LLM's output, so its answers don't influence yours.
-3. When a review covers several topics, choose the theme it complains about **most**. If it's an even split, choose the one mentioned first.
-4. Record each label in `labels.csv`, then run `src/check_labels.py` to catch typos and missing values.
+3. Record each label in `labels.csv`, then run `src/check_labels.py` to catch typos and missing values.
 
 ## Themes (choose exactly one)
 
@@ -20,16 +19,19 @@ This guide is used for two things: hand-labeling the 100-review test set, and wr
 | `performance` | Crashes, freezing, slow loading, bugs not covered by another theme | "Crashes every time I open it" |
 | `ui_navigation` | Layout, design, finding features, confusing menus | "Way too many taps to find anything" |
 | `notifications` | Push notifications and alerts (missing, too many, or wrong) | "Never get notified when my schedule changes" |
+| `messaging_feed` | Chat, team messages, company feed or posts | "Chat messages never load" |
 | `support` | Customer service, help desk, employer or HR admin issues | "Support never responded" |
 | `positive_general` | General praise with no specific feature mentioned | "Great app, works fine" |
 | `negative_general` | General complaint with no specific feature mentioned | "Terrible app" |
 | `other` | Doesn't fit any theme above, or isn't understandable | "ok" |
 
 **Tie-breaker rules**
+- When a review covers several topics, choose the theme it complains about **most**. If it's an even split, choose the one mentioned first.
 - A crash that happens *while clocking in* goes under `timekeeping`, because the user's goal is the more useful signal for a PM.
 - "Can't log in, so I can't see my pay" goes under `login_auth`, because the login is the root cause.
 - Praise that names a specific feature goes under that feature's theme with positive sentiment, not under `positive_general`.
 - If a vague complaint also names a specific feature (e.g., "terrible app, keeps logging me out"), use that feature's theme, not `negative_general`.
+- "I don't get notified about new chat messages" goes under `notifications`, because the alert is what failed, not the chat itself.
 
 ## Sentiment
 
