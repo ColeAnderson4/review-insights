@@ -1,3 +1,0 @@
-review_id,text,rating,theme,sentiment,is_feature_request,request_summary,notes
-example_1,"Logs me out every time I switch apps, so annoying",2,login_auth,negative,false,,
-example_2,"Wish I could swap shifts with coworkers in the app",4,scheduling_pto,neutral,true,Add in-app shift swapping,4 stars but mostly a request

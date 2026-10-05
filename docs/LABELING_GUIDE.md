@@ -4,10 +4,10 @@ This guide is used for two things: hand-labeling the 100-review test set, and wr
 
 ## How to label
 
-1. Choose 100 reviews **at random**, using `df.sample(100, random_state=42)`. Do not hand-pick them.
+1. Choose 100 reviews **at random**: 50 per app, each with `df.sample(50, random_state=42)`, then shuffled so the apps are mixed. `src/make_label_sample.py` does this. Do not hand-pick them.
 2. Label all 100 **before** you look at the LLM's output, so its answers don't influence yours.
 3. When a review covers several topics, choose the theme it complains about **most**. If it's an even split, choose the one mentioned first.
-4. Record each label in `labels.csv`.
+4. Record each label in `labels.csv`, then run `src/check_labels.py` to catch typos and missing values.
 
 ## Themes (choose exactly one)
 
@@ -43,10 +43,14 @@ Use the text, not the star rating. A 4-star review that complains a lot is `nega
 
 ## Feature request
 
-Mark `true` only when the review asks for something **new** or **changed**, such as "Please add dark mode" or "Wish I could swap shifts in the app." Reporting a bug ("fix the login") is **not** a feature request. For `true` reviews, write a summary of 8 words or fewer.
+Mark `true` only when the review asks for something **new** or **changed**, such as "Please add dark mode" or "Wish I could swap shifts in the app." Reporting a bug ("fix the login") is **not** a feature request. For `true` reviews, write a summary of 8 words or fewer in `request_summary`.
+
+The request must be **explicit**. If a review only complains about a gap and you have to infer what they want (e.g., "it doesn't show how much time was used"), mark it `false`, leave `request_summary` empty, and write the implied request in `notes`.
 
 ## labels.csv columns
 
-`review_id, text, rating, theme, sentiment, is_feature_request, request_summary, notes`
+`review_id, app, text, theme, sentiment, is_feature_request, request_summary, notes`
+
+The star rating is left out on purpose, so it can't bias the sentiment label. If needed, join it back from `data/raw/` by `review_id`.
 
 Use `notes` for reviews that were hard to label. They make good examples for the README's limitations section.
