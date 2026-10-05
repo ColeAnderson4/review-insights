@@ -1,5 +1,5 @@
 review_id,app,text,theme,sentiment,is_feature_request,request_summary,notes
-f3ecf9ac-d6a2-454f-a653-8f1eb0218bd5,workday,"it was good. because I managed to talk to my manager about things that was bordering me ,She was very open to me and explain things that I didn't do right",positive_general,positive,FALSE,,
+f3ecf9ac-d6a2-454f-a653-8f1eb0218bd5,workday,"it was good. because I managed to talk to my manager about things that was bordering me ,She was very open to me and explain things that I didn't do right",other,positive,FALSE,,
 c3d0b067-3993-4408-a3d9-b81448dce9c6,workday,Works well.,positive_general,positive,FALSE,,
 9f7396ff-bff8-43ae-bb34-ec4cc20070ce,workday,easy to navigate. instructions are clear,ui_navigation,positive,FALSE,,
 4d29558d-d6f8-4b3e-b98f-64663a0906e8,ukg_pro,"it is easier to get logged in at work. Meijer then using their computers, it's faster and more convenient.",login_auth,positive,FALSE,,
@@ -8,7 +8,7 @@ c3d0b067-3993-4408-a3d9-b81448dce9c6,workday,Works well.,positive_general,positi
 2d5a75d3-37e4-436d-9fe2-2d7e0cbc6f54,ukg_pro,Satisfied,positive_general,positive,FALSE,,
 932498d6-2a37-4b52-ac30-707c8437af5e,workday,"application was slow,confusing,",performance,negative,FALSE,,
 850d2d03-3e20-4da7-a4b8-c562c06c413b,ukg_pro,"can't open anything. has been a slow, buggy app for a long time.",performance,negative,FALSE,,
-eddf84fa-0624-4e2d-909d-aabde02cfec8,ukg_pro,Very frustrating will not allow me to login and whe it does i can't see my schedule half the time. I have to close out the app and log back in.,performance,negative,FALSE,,
+eddf84fa-0624-4e2d-909d-aabde02cfec8,ukg_pro,Very frustrating will not allow me to login and whe it does i can't see my schedule half the time. I have to close out the app and log back in.,login_auth,negative,FALSE,,
 1679c5e8-7636-4092-939f-ff40baf1d66b,ukg_pro,nice,positive_general,positive,FALSE,,
 9920ba7d-d8d5-45eb-8ef6-a22a23ab2f13,ukg_pro,"if I could rate this app with ZERO stars, I would. this app is TERRIBLE!! not even an app, its a glorified web browser shortcut- everything takes longer than it should to load and is probably stealing information off of my phone, the layout is atrocious and its both impossible to navigate and USE! things glitch, not load properly, the screen goes up & down on its choosing regardless what im trying to look at. I truly despise this app and this forced transfer. IT MAKES MY JOB *MORE* DIFFICULT!!!!",performance,negative,FALSE,,
 21b41e6c-dca7-4932-87fa-189af099fca6,workday,unable to sign In,login_auth,negative,FALSE,,
@@ -34,7 +34,7 @@ f3ea0fc2-b2a3-435d-9f62-d4153c33b85c,ukg_pro,sometimes it slows down,performance
 f05c1d15-2a87-45cf-94df-f95d0163ad55,workday,good to used,positive_general,positive,FALSE,,
 e4ef5c9e-eb65-42d3-977e-4eb0b3878687,ukg_pro,still a bit slow to log.,login_auth,negative,FALSE,,
 3391b8bb-8dd0-40ae-95bd-db52c5725a4f,workday,great app,positive_general,positive,FALSE,,
-6dc9f61b-c70c-42bc-8431-c7bffd95d54c,ukg_pro,"awful, it takes forever to log in and then it takes forever to load anything",performance,negative,FALSE,,
+6dc9f61b-c70c-42bc-8431-c7bffd95d54c,ukg_pro,"awful, it takes forever to log in and then it takes forever to load anything",login_auth,negative,FALSE,,
 30c8cdbc-822d-402c-a5f5-faea15b0f07c,workday,solid for switching jobs,positive_general,positive,FALSE,,
 e476b8c1-211b-45a3-bd21-04a77a4bf035,workday,"The process is hindered by too many access hurdles, despite selecting options to 'not show this again' etc. these options continue to appear. Additionally, when prompted to receive a text message, they very often are not sent and it becomes necessary to re-load the process.",login_auth,negative,FALSE,,
 8c4a9df8-e4d5-4bd5-b92c-8af81564db97,ukg_pro,"This app doesn't even show something as basic as current pay or hours. Usual corporate garbage. ""Pro"" should at least be somewhat useful.",pay,negative,FALSE,,
@@ -71,12 +71,12 @@ c3502bcc-fbc4-4d6a-a6ee-164f8dc20505,workday,very easy!,positive_general,positiv
 5792cd51-db67-4058-8a6f-6b617439c2da,workday,takes 10 years to load each thing and then the page has an error and you have to start all over,performance,negative,FALSE,,
 db18c120-8a1c-4b76-8a6a-42d3dfcc5c98,workday,regularly logs me out then after verifying myself I will just get a blank screen. This will happen for days at a time and then one day it will randomly start working again. Terrible,login_auth,negative,FALSE,,Blank screen after log on 
 02d876ae-dc14-43ef-bec0-0638637e3b40,ukg_pro,very slow,performance,negative,FALSE,,
-c2a81d78-2c78-4b18-abda-c1f7537fac87,workday,mudah digunakan,ui_navigation,positive,FALSE,,Indoniesian = easy to use 
+c2a81d78-2c78-4b18-abda-c1f7537fac87,workday,mudah digunakan,positive_general,positive,FALSE,,Indoniesian = easy to use 
 13563b97-0acf-476a-a7e6-8a8a81ebf3b0,ukg_pro,Way to slow and needs a next shift update or notification or something,performance,negative,TRUE,Notify user when shift is coming,
 51067f02-d764-44a2-af8d-985c01e929db,workday,good experience so far,positive_general,positive,FALSE,,
 32009a5b-bf54-4faa-b3d2-64c531de2f23,workday,"workday is absolute garbage, the app is super clunky and it's a horrible system. it goes down for maintenance at midnight on Fridays every single week and I can't clock out because my shift ends at 12:30. then I get an angry email telling me I need to submit my hours for the week which I have never had to do at any other job.",timekeeping,negative,FALSE,,
 6144c27f-2442-4c0e-8048-6e56935d5f48,workday,it was great,positive_general,positive,FALSE,,
-84234bca-4bf9-4d2b-b15e-a5f70dfdba09,ukg_pro,"Loads so slow. If you use it to clock in, better do it five minutes early or you are going to be late.",performance,negative,FALSE,,takes long time to clock in 
+84234bca-4bf9-4d2b-b15e-a5f70dfdba09,ukg_pro,"Loads so slow. If you use it to clock in, better do it five minutes early or you are going to be late.",timekeeping,negative,FALSE,,takes long time to clock in 
 d260a365-b6e2-42ce-a68f-19bfa4113072,workday,"Vile system, Can literally never log in, always comes up with errors. Sometimes the capatcha never loads to login either. It causes unnecessary stress.",login_auth,negative,FALSE,,
 bb66f448-38fc-43c6-89d7-2a9ca8e47681,workday,very convenient,positive_general,positive,FALSE,,
 60ec4560-6b30-4acc-8f57-74c40479be08,workday,HR in our fingertips. I'm loving it❤️ Netcare Best company to work for 🙏,positive_general,positive,FALSE,,

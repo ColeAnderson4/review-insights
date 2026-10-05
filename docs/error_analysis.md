@@ -18,7 +18,7 @@ The 👌 review counts in two rows (sentiment: my error; theme: unclear rule), s
 
 ## Reviews where the rule is unclear
 
-Labels for these reviews were **not** changed. This section records what the guide leaves open; it doesn't propose rule changes yet.
+Labels for these reviews were **not** changed in round 1. This section records what the guide left open. The rule decided for each gap is listed in [Decisions](#decisions).
 
 ### 1. Slowness while logging in
 
@@ -80,3 +80,23 @@ Labels for these reviews were **not** changed. This section records what the gui
 - Before corrections, `performance` was my label on 8 of the 15 theme disagreements. The LLM never chose `performance` when I hadn't.
 - The LLM chose `other` on 7 of the 15 theme disagreements, all for Workday reviews. Several of the unclear cases above (2, 5, 6) involve reviews that don't fit a theme built around employee timekeeping and scheduling.
 - All 3 cases where I labeled `negative` and the LLM labeled `positive` were very short praise reviews. All 3 were my labeling errors.
+
+## Decisions
+
+For each gap, I compared two candidate rules and listed every review in all 100 rows whose label would change under each one. The chosen rules are now in `LABELING_GUIDE.md`. The resulting label changes are logged in `label_corrections.md` (round 2).
+
+| # | Gap | Rule chosen | Alternative rejected | Labels changed |
+|---|---|---|---|---|
+| 1 | Slowness while logging in | Slowness or extra steps while signing in go under `login_auth`, like a crash while clocking in goes under `timekeeping` | Slowness is always `performance` (this would have undone the `e4ef5c9e` correction) | `6dc9f61b` → login_auth |
+| 2 | Device compatibility | Install, update and device/OS compatibility problems go under `performance` | Put them under `other` | none (`b1ee8878`, `80c9632e` and `925d41c2` were already `performance`) |
+| 3 | Confusion that doesn't name the interface | Confusion about the app's wording, steps or flows goes under `ui_navigation` | Very short, unclear confusion goes under `other` | none (`cc3fb136` "its doing too much" was considered and kept as `negative_general`) |
+| 4a | "Easy to use" praise | General ease praise is `positive_general`; only praise naming navigation, layout or design is `ui_navigation` | All ease-of-use praise goes under `ui_navigation` (this would have changed 5 or 6 reviews) | `c2a81d78` → positive_general |
+| 4b | Non-English reviews | Label by meaning and record the language in `notes` | Non-English reviews go under `other` | none |
+| 5 | Praise for the job or employer | Reviews mainly about the employer, job or coworkers are `other`; app praise for a job-related use stays app praise (`positive_general` if the feature has no theme) | Anything about the job, employer or hiring is `other` | `f3ecf9ac` → other (`d5e8bc72`, French, was considered and kept as `positive_general`) |
+| 6 | Emoji-only reviews | Label by meaning: a clearly positive emoji is `positive_general`, and an emoji whose meaning is unclear is `other` | Every emoji-only review is `other` | none (`484430f0` 👌 stays `positive_general`) |
+
+While checking all 100 rows, I also found two labels that broke rules **already** in the guide. I corrected both:
+- `eddf84fa` → `login_auth`: its main complaint is that sign-in fails. In round 1, I wrongly recorded it as an LLM error.
+- `84234bca` → `timekeeping`: under the clock-in tie-breaker, slowness while clocking in goes under `timekeeping`.
+
+The 2026-10-04 run was originally scored as 0.85 theme agreement. Because the round-1 corrections and these 5 changes were made after seeing that run's labels, US-7 reports every score against both the original labels and the newest labels.

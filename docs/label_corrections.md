@@ -1,6 +1,8 @@
 # Label Corrections
 
-Changes made to `data/labels.csv` after reviewing the disagreements from the first LLM evaluation run (US-7).
+Changes made to `data/labels.csv` during US-7, in two rounds:
+1. A review of the disagreements from the first LLM evaluation run (below).
+2. A review of all 100 rows after the rule gaps were decided (see "Round 2" at the end).
 
 - **Date:** 2026-10-04
 - **Run reviewed:** model `claude-sonnet-5-5`, prompt version `1a46f99f` (theme agreement 0.85, sentiment agreement 0.95)
@@ -47,3 +49,25 @@ Each reason cites the rule in `LABELING_GUIDE.md` that the corrected label follo
 |---|---|---|---|
 | `eddf84fa-0624-4e2d-909d-aabde02cfec8` | "will not allow me to login and when it does i can't see my schedule…" | performance | login_auth |
 | `9920ba7d-d8d5-45eb-8ef6-a22a23ab2f13` | "everything takes longer than it should to load… the layout is atrocious…" | performance | ui_navigation |
+
+*Update (round 2):* on a second look, `eddf84fa` was my error, not the LLM's. It was relabeled `login_auth` in round 2 below.
+
+## Round 2: rule decisions and a review of all 100 rows
+
+- **Date:** 2026-10-05
+- **Labels before:** version `0b599664` (after round 1). **Labels after:** version `fdc92925`.
+
+After I decided the 6 rule gaps in `error_analysis.md` and added the new rules to `LABELING_GUIDE.md`, I checked **all 100 rows**, not just the disagreements, for labels that the new rules or the existing rules would change. This addresses part of the round-1 caveat: in this round, a review didn't have to be a disagreement to be re-checked.
+
+Some caveats remain:
+- I had already seen the LLM's labels from the first run, so this review wasn't blind.
+- The new rules were written after I saw the disagreements, so they may fit the LLM's choices better than rules written in advance would.
+- For those reasons, US-7 still reports scores against the original labels (`2e5be67`) as well.
+
+| review_id | field | old value | new value | reason |
+|---|---|---|---|---|
+| `6dc9f61b-c70c-42bc-8431-c7bffd95d54c` | theme | performance | login_auth | New rule: slowness while signing in goes under `login_auth`. "forever to log in and then … forever to load anything" is an even split between slow login and slow loading, so the theme mentioned first wins. |
+| `c2a81d78-2c78-4b18-abda-c1f7537fac87` | theme | ui_navigation | positive_general | New rules: non-English reviews are labeled by meaning, and general ease-of-use praise is `positive_general`. "mudah digunakan" = "easy to use"; it doesn't name navigation or layout. |
+| `f3ecf9ac-d6a2-454f-a653-8f1eb0218bd5` | theme | positive_general | other | New rule: reviews mainly about the employer, job or coworkers are `other`. "I managed to talk to my manager… She was very open" praises the manager, not the app. Consistent with `8ad2cd6e` in round 1. |
+| `eddf84fa-0624-4e2d-909d-aabde02cfec8` | theme | performance | login_auth | Existing rule: `login_auth` covers signing in. The first and main complaint is "will not allow me to login". In round 1, I wrongly recorded this as an LLM error. |
+| `84234bca-4bf9-4d2b-b15e-a5f70dfdba09` | theme | performance | timekeeping | Existing tie-breaker: a problem while clocking in goes under `timekeeping`. "If you use it to clock in, better do it five minutes early or you are going to be late." My original note already said "takes long time to clock in". |

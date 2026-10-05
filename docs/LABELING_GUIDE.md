@@ -32,6 +32,15 @@ This guide is used for two things: hand-labeling the 100-review test set, and wr
 - Praise that names a specific feature goes under that feature's theme with positive sentiment, not under `positive_general`.
 - If a vague complaint also names a specific feature (e.g., "terrible app, keeps logging me out"), use that feature's theme, not `negative_general`.
 - "I don't get notified about new chat messages" goes under `notifications`, because the alert is what failed, not the chat itself.
+- Slowness or extra steps while signing in go under `login_auth`, the same way a crash while clocking in goes under `timekeeping`. Use `performance` for slowness after sign-in.
+
+**Edge cases**
+- Install, update, and device or OS compatibility problems (e.g., "Recent update makes the app incompatible with my phone") go under `performance`.
+- Confusion about the app's wording, steps, or flows (e.g., "confusing on terms") goes under `ui_navigation`, even if the review doesn't mention menus or layout.
+- General ease-of-use praise ("easy to use", "very easy") goes under `positive_general`. Only praise that names navigation, layout, or design ("easy to navigate") goes under `ui_navigation`.
+- If a review is mainly about the employer, job, or coworkers rather than the app (e.g., "Great environment, friendly people"), use `other`. If it praises the app for a job-related use, such as applying, onboarding, or switching jobs, treat it as app praise, and use `positive_general` when the feature it names has no theme.
+- Label emoji-only reviews by their meaning: a clearly positive emoji such as 👌 or 👍 is `positive_general`, and an emoji whose meaning is unclear is `other`.
+- Label non-English reviews by their meaning. In `labels.csv`, record the language in `notes`.
 
 ## Sentiment
 

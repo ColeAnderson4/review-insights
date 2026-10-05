@@ -1,3 +1,6 @@
 evaluated_at,model,prompt_version,labels_version,n_scored,n_missing,failure_rate,theme_agreement,sentiment_agreement,theme_agreement_ukg_pro,sentiment_agreement_ukg_pro,theme_agreement_workday,sentiment_agreement_workday,theme_baseline_label,theme_baseline,sentiment_baseline_label,sentiment_baseline,fr_precision,fr_recall,fr_f1,fr_tp,fr_fp,fr_fn
-2026-10-04T23:51:27,claude-sonnet-5-5,1a46f99f,19d83b15,100,0,0.0,0.85,0.95,0.86,0.98,0.84,0.92,positive_general,0.27,negative,0.68,0.6666666666666666,1.0,0.8,2,1,0
 2026-10-04T23:51:33,claude-sonnet-5-5,1a46f99f,0b599664,100,0,0.0,0.9,1.0,0.94,1.0,0.86,1.0,positive_general,0.26,negative,0.65,1.0,1.0,1.0,3,0,0
+2026-10-05T00:06:27,claude-sonnet-5-5,1a46f99f,19d83b15,100,0,0.0,0.85,0.95,0.86,0.98,0.84,0.92,positive_general,0.27,negative,0.68,0.6666666666666666,1.0,0.8,2,1,0
+2026-10-05T00:06:29,claude-sonnet-5-5,1a46f99f,fdc92925,100,0,0.0,0.91,1.0,0.96,1.0,0.86,1.0,positive_general,0.26,negative,0.65,1.0,1.0,1.0,3,0,0
+2026-10-05T00:06:31,claude-sonnet-5-5,4af6be35,19d83b15,100,0,0.0,0.89,0.95,0.84,0.98,0.94,0.92,positive_general,0.27,negative,0.68,0.6666666666666666,1.0,0.8,2,1,0
+2026-10-05T00:06:32,claude-sonnet-5-5,4af6be35,fdc92925,100,0,0.0,0.99,1.0,0.98,1.0,1.0,1.0,positive_general,0.26,negative,0.65,1.0,1.0,1.0,3,0,0
