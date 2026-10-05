@@ -4,10 +4,28 @@ The prompt is built from docs/LABELING_GUIDE.md at runtime, so the LLM follows
 the same rules used for the hand labels.
 """
 
+
+import hashlib
 import json
+from datetime import datetime
 from pathlib import Path
 
+import pandas as pd
+
 GUIDE_PATH = Path("docs/LABELING_GUIDE.md")
+FAILURE_LOG = Path("logs/classify_failures.jsonl")
+
+# Columns of the output CSV, in order
+OUTPUT_COLUMNS = [
+    "review_id", "app", "theme", "sentiment", "is_feature_request",
+    "request_summary", "model", "prompt_version",
+]
+
+# Dollars per million tokens: (input, output). Used only to print the running cost.
+PRICES = {
+    "claude-sonnet-5-5": (2.00, 10.00),
+    "claude-opus-5-5": (4.00, 20.00),
+}
 
 # One constant, so US-7 can compare models by changing a single line
 MODEL = "claude-sonnet-5-5"
@@ -213,6 +231,23 @@ def build_system_prompt():
     return INSTRUCTIONS + "\n\n# Labeling rules\n\n" + rules
 
 
+def prompt_version(system_prompt):
+    """Return a short fingerprint of the system prompt, used to tell runs apart.
+
+    Input:
+        system_prompt: the full prompt string from build_system_prompt().
+
+    Output:
+        The first 8 characters of the SHA-256 hex digest of the prompt,
+        e.g. "3f9a0c1e". The same prompt always gives the same version, and
+        any change to the guide's rules or INSTRUCTIONS gives a new one.
+
+    Hint: hashlib.sha256() takes bytes, not a string, so encode the string
+    first with .encode("utf-8"). .hexdigest() turns the hash into text.
+    """
+    return hashlib.sha256(system_prompt.encode("utf-8")).hexdigest()[:8]
+
+
 def build_user_message(reviews):
     """Number the reviews 1..n and wrap each in <review> tags.
 
@@ -371,6 +406,117 @@ def classify_batch(client, system_prompt, reviews):
         })
 
     return results, failures, usage
+
+
+def load_done_ids(out_path, model, version):
+    """Return the set of review_ids already in out_path for this model and prompt version.
+
+    A different model or prompt version doesn't count as done, so US-7 runs
+    re-classify everything and add new rows next to the old ones.
+    """
+    if not out_path.exists():
+        return set()
+
+    # dtype=str matters: a version like "12345678" would otherwise load as a
+    # number, and "1e345678" as infinity, and neither would match the string.
+    done = pd.read_csv(out_path, dtype=str)
+    same_run = done[(done["model"] == model) & (done["prompt_version"] == version)]
+    return set(same_run["review_id"])
+
+
+def append_rows(rows, out_path):
+    """Append result rows to the output CSV, writing the header only if the file is new."""
+    if not rows:
+        return
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df = pd.DataFrame(rows, columns=OUTPUT_COLUMNS)
+    df.to_csv(out_path, mode="a", header=not out_path.exists(), index=False)
+
+
+def log_failures(failures, version):
+    """Append each failed review to the failure log as one JSON object per line."""
+    if not failures:
+        return
+
+    FAILURE_LOG.parent.mkdir(parents=True, exist_ok=True)
+    with open(FAILURE_LOG, "a", encoding="utf-8") as f:
+        for failure in failures:
+            record = {
+                "time": datetime.now().isoformat(timespec="seconds"),
+                "model": MODEL,
+                "prompt_version": version,
+                "review_id": failure["review_id"],
+                "errors": failure["errors"],
+                "raw_text": failure["raw_text"],
+            }
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def cost_in_dollars(usage):
+    """Convert token counts to dollars using PRICES for the current MODEL."""
+    input_price, output_price = PRICES[MODEL]
+    return (usage["input_tokens"] * input_price + usage["output_tokens"] * output_price) / 1_000_000
+
+
+def classify_reviews(client, reviews, out_path):
+    """Classify every review in a DataFrame, saving results after each batch.
+
+    Input:
+        reviews:  DataFrame with review_id, app, and text columns.
+        out_path: CSV to append results to (see OUTPUT_COLUMNS). Reviews that
+                  already have a row there for this MODEL and prompt version
+                  are skipped, so a crashed or repeated run doesn't pay twice.
+
+    Reviews that still fail after the retry are written to FAILURE_LOG, not
+    the CSV. Running again retries them, because they have no row yet.
+
+    Returns a summary dict: skipped, classified, failed, cost.
+    """
+    system_prompt = build_system_prompt()
+    version = prompt_version(system_prompt)
+
+    done_ids = load_done_ids(out_path, MODEL, version)
+    todo = reviews[~reviews["review_id"].isin(done_ids)]
+    records = todo[["review_id", "app", "text"]].to_dict("records")
+
+    n_batches = (len(records) + BATCH_SIZE - 1) // BATCH_SIZE  # round up
+    print(f"Model {MODEL}, prompt version {version}")
+    print(f"{len(done_ids)} reviews already done, {len(records)} to classify in {n_batches} batches.")
+
+    summary = {"skipped": len(done_ids), "classified": 0, "failed": 0, "cost": 0.0}
+
+    for batch_number in range(n_batches):
+        start = batch_number * BATCH_SIZE
+        batch = records[start:start + BATCH_SIZE]
+
+        results, failures, usage = classify_batch(client, system_prompt, batch)
+
+        # classify_batch returns only the labels, so add app, model, and version here
+        app_by_id = {}
+        for review in batch:
+            app_by_id[review["review_id"]] = review["app"]
+
+        rows = []
+        for result in results:
+            row = dict(result)  # copy, so we don't change the dict classify_batch returned
+            row["app"] = app_by_id[result["review_id"]]
+            row["model"] = MODEL
+            row["prompt_version"] = version
+            rows.append(row)
+
+        append_rows(rows, out_path)
+        log_failures(failures, version)
+
+        summary["classified"] += len(results)
+        summary["failed"] += len(failures)
+        summary["cost"] += cost_in_dollars(usage)
+        print(
+            f"  Batch {batch_number + 1}/{n_batches}: {len(results)} ok, {len(failures)} failed. "
+            f"Cost so far ${summary['cost']:.3f}"
+        )
+
+    return summary
 
 
 if __name__ == "__main__":
