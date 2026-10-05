@@ -101,6 +101,51 @@ def extract_section(guide_text, heading):
     return "\n".join(section_lines).strip()
 
 
+def themes_from_guide():
+    """Return the theme names from the Themes table in the labeling guide, in table order.
+
+    A theme row looks like:  | `login_auth` | Signing in, ... | "Logs me out..." |
+    so the name is the text between the first pair of backticks.
+    """
+    guide_text = GUIDE_PATH.read_text(encoding="utf-8")
+    themes_section = extract_section(guide_text, "## Themes")
+
+    themes = []
+    for line in themes_section.splitlines():
+        if line.startswith("| `"):
+            # "| `login_auth` | ..." split on "`" -> ["| ", "login_auth", " | ..."]
+            name = line.split("`")[1]
+            themes.append(name)
+
+    return themes
+
+
+def check_themes_match_guide():
+    """Raise ValueError if THEMES in this file and the guide's Themes table differ.
+
+    Run this before classifying, so a theme added to the guide (or a typo in
+    THEMES) stops the script instead of producing labels that can't be scored.
+    """
+    guide_themes = themes_from_guide()
+
+    missing_from_code = []
+    for theme in guide_themes:
+        if theme not in THEMES:
+            missing_from_code.append(theme)
+
+    missing_from_guide = []
+    for theme in THEMES:
+        if theme not in guide_themes:
+            missing_from_guide.append(theme)
+
+    if missing_from_code or missing_from_guide:
+        raise ValueError(
+            f"THEMES does not match {GUIDE_PATH}. "
+            f"In the guide but not THEMES: {missing_from_code}. "
+            f"In THEMES but not the guide: {missing_from_guide}."
+        )
+
+
 def build_system_prompt():
     """Build the system prompt: fixed instructions + the rule sections from the labeling guide."""
     guide_text = GUIDE_PATH.read_text(encoding="utf-8")
@@ -114,5 +159,7 @@ def build_system_prompt():
 
 
 if __name__ == "__main__":
-    # Temporary: print the prompt so we can review it. main() replaces this in step 5.
+    # Temporary: check themes and print the prompt. main() replaces this in step 5.
+    check_themes_match_guide()
+    print(f"THEMES matches the guide ({len(THEMES)} themes).")
     print(build_system_prompt())
