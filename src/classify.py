@@ -2,17 +2,27 @@
 
 The prompt is built from docs/LABELING_GUIDE.md at runtime, so the LLM follows
 the same rules used for the hand labels.
+
+Usage (run from the project root):
+    python src/classify.py --input labels                             # the 100 hand-labeled reviews
+    python src/classify.py --input raw                                # all scraped reviews
+    python src/classify.py --input raw --exclude-labeled --limit 20   # cheap dev run
 """
 
-
+import argparse
 import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
 
+import anthropic
 import pandas as pd
+from dotenv import load_dotenv
+
+from scrape import APPS, RAW_DIR
 
 GUIDE_PATH = Path("docs/LABELING_GUIDE.md")
+LABELS_PATH = Path("data/labels.csv")
 FAILURE_LOG = Path("logs/classify_failures.jsonl")
 
 # Columns of the output CSV, in order
@@ -519,8 +529,90 @@ def classify_reviews(client, reviews, out_path):
     return summary
 
 
-if __name__ == "__main__":
-    # Temporary: check themes and print the prompt. main() replaces this in step 5.
+def load_reviews(input_name, exclude_labeled=False, limit=None):
+    """Load the reviews to classify as a DataFrame with review_id, app, and text.
+
+    input_name:
+        "labels" -> data/labels.csv. Only review_id, app, and text are read, so
+                    the hand labels are never loaded into this script.
+        "raw"    -> every app's scraped CSV in data/raw/.
+    exclude_labeled: drop reviews that are in labels.csv (for dev runs).
+    limit: keep a random sample of this many reviews (for cheap test runs).
+    """
+    if input_name == "labels":
+        reviews = pd.read_csv(LABELS_PATH, usecols=["review_id", "app", "text"])
+    else:
+        frames = []
+        for app_name in APPS:
+            frames.append(pd.read_csv(RAW_DIR / f"{app_name}_reviews.csv"))
+        reviews = pd.concat(frames)[["review_id", "app", "text"]]
+
+    if exclude_labeled:
+        labeled_ids = pd.read_csv(LABELS_PATH, usecols=["review_id"])["review_id"]
+        reviews = reviews[~reviews["review_id"].isin(labeled_ids)]
+
+    # An empty review has nothing to classify
+    has_text = reviews["text"].notna() & (reviews["text"].astype(str).str.strip() != "")
+    if (~has_text).sum() > 0:
+        print(f"Dropping {(~has_text).sum()} reviews with no text.")
+    reviews = reviews[has_text]
+
+    if limit is not None and limit < len(reviews):
+        # A random sample (not the first N rows) so a test run includes both apps.
+        # A fixed random_state picks the same reviews each time, so they're skipped when re-run.
+        reviews = reviews.sample(limit, random_state=42)
+
+    return reviews
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Classify reviews with the Claude API.")
+    parser.add_argument(
+        "--input",
+        choices=["labels", "raw"],
+        required=True,
+        help="labels = the 100 hand-labeled reviews; raw = all scraped reviews.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="Classify only a random sample of this many reviews (for testing).",
+    )
+    parser.add_argument(
+        "--exclude-labeled",
+        action="store_true",
+        help="Skip reviews that are in labels.csv (for dev runs on raw reviews).",
+    )
+    args = parser.parse_args()
+
+    if args.input == "labels" and args.exclude_labeled:
+        parser.error("--exclude-labeled can't be used with --input labels (nothing would be left).")
+
+    # Fail before spending anything if the code and the guide disagree
     check_themes_match_guide()
-    print(f"THEMES matches the guide ({len(THEMES)} themes).")
-    print(build_system_prompt())
+
+    reviews = load_reviews(args.input, args.exclude_labeled, args.limit)
+    out_path = RAW_DIR / f"classified_{args.input}.csv"
+    print(f"Loaded {len(reviews)} reviews from '{args.input}'. Results go to {out_path}")
+
+    load_dotenv()  # reads ANTHROPIC_API_KEY from .env
+    client = anthropic.Anthropic()
+
+    summary = classify_reviews(client, reviews, out_path)
+
+    # Totals only. Never print labels here: for --input labels they must stay
+    # unseen until the evaluation script runs.
+    attempted = summary["classified"] + summary["failed"]
+    print("\nDone.")
+    print(f"  Already done (skipped): {summary['skipped']}")
+    print(f"  Classified this run:    {summary['classified']}")
+    print(f"  Failed this run:        {summary['failed']}")
+    if attempted > 0:
+        print(f"  Failure rate:           {summary['failed'] / attempted:.1%}  (PRD target: under 2%)")
+    print(f"  Cost this run:          ${summary['cost']:.3f}")
+    if summary["failed"] > 0:
+        print(f"  Failures logged to {FAILURE_LOG}. Run the same command again to retry them.")
+
+
+if __name__ == "__main__":
+    main()
