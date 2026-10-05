@@ -21,5 +21,5 @@ I'm a student building this as a portfolio project, and **I want to learn, not j
 - `data/raw/` is git-ignored. Cache scraped reviews there so we don't re-scrape.
 - LLM outputs must be validated JSON. Retry once on failure and log anything that still fails.
 - Theme names must exactly match `docs/LABELING_GUIDE.md`.
-- Don't modify `data/labels.csv`. Those are my hand labels.
+- Only change data/labels.csv when I approve it, and log every change in docs/label_corrections.md.
 - Suggest a git commit message after each completed user story (e.g., "US-1: scrape reviews to CSV").

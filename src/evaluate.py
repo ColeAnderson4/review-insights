@@ -9,10 +9,12 @@ Usage (run from the project root):
     python src/evaluate.py                                    # works when there is only one run
     python src/evaluate.py --model claude-sonnet-5-5 --prompt-version 1a46f99f
     python src/evaluate.py --show-disagreements               # also print every disagreement
+    python src/evaluate.py --labels data/raw/labels_2e5be67.csv  # score against another labels file
 """
 
 import argparse
 from datetime import datetime
+import hashlib
 from pathlib import Path
 
 import pandas as pd
@@ -57,11 +59,30 @@ def to_bool(values, file_name):
     return converted.astype(bool)
 
 
-def load_data(model, prompt_version):
+def labels_version(path):
+    """Return a short fingerprint of a labels file, used to tell label versions apart.
+
+    Input:
+        path: the labels CSV, e.g. data/labels.csv or a copy restored from git.
+
+    Output:
+        The first 8 characters of the SHA-256 hex digest of the file's bytes,
+        e.g. "3f9a0c1e". The same file always gives the same version, and any
+        edit to the file (even re-saving it in Excel) gives a new one.
+
+    Hint: Path(path).read_bytes() returns bytes, which hashlib.sha256() takes
+    directly, so unlike prompt_version there's no .encode() step. You'll need
+    to import hashlib.
+    """
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:8]
+
+def load_data(model, prompt_version, labels_path):
+   
     """Join the hand labels to one run's LLM labels by review_id.
 
     Input:
         model, prompt_version: which run to score (see list_runs()).
+        labels_path: the hand-labels CSV to score against (usually LABELS_PATH).
 
     Returns (merged, n_missing):
         merged:    one row per review that both files have. Columns: review_id,
@@ -73,7 +94,7 @@ def load_data(model, prompt_version):
     """
     # dtype=str for the same reason as load_done_ids in classify.py: a version
     # like "12345678" would otherwise load as a number and never match.
-    labels = pd.read_csv(LABELS_PATH, dtype=str)
+    labels = pd.read_csv(labels_path, dtype=str)
     classified = pd.read_csv(CLASSIFIED_PATH, dtype=str)
 
     run = classified[(classified["model"] == model) & (classified["prompt_version"] == prompt_version)]
@@ -94,7 +115,7 @@ def load_data(model, prompt_version):
     )
     n_missing = len(labels) - len(merged)
 
-    merged["is_feature_request_hand"] = to_bool(merged["is_feature_request_hand"], LABELS_PATH)
+    merged["is_feature_request_hand"] = to_bool(merged["is_feature_request_hand"], labels_path)
     merged["is_feature_request_llm"] = to_bool(merged["is_feature_request_llm"], CLASSIFIED_PATH)
 
     # Empty cells load as NaN. Blank strings print and compare more simply.
@@ -281,23 +302,38 @@ def print_targets(results):
         print(f"  {label:26}{target_text:>10}{actual_text:>10}   {result_text}")
 
 
-def save_history(results, model, prompt_version):
-    """Write this run's numbers to HISTORY_PATH, replacing any earlier row for the same run.
+def save_history(results, model, prompt_version, labels_ver):
+    """Write this run's numbers to HISTORY_PATH, replacing any earlier row for the
+    same run scored against the same labels.
 
-    Re-scoring the same run gives the same numbers, so keeping one row per
-    (model, prompt_version) stops the before/after table filling with duplicates.
+    Re-scoring the same run against the same labels gives the same numbers, so
+    keeping one row per (model, prompt_version, labels_version) stops the
+    before/after table filling with duplicates. Scoring against a different
+    labels file (e.g. the original vs. corrected labels) adds a separate row.
     """
     row = {
         "evaluated_at": datetime.now().isoformat(timespec="seconds"),
         "model": model,
         "prompt_version": prompt_version,
+        "labels_version": labels_ver,
     }
     row.update(results)
     new_row = pd.DataFrame([row])
 
     if HISTORY_PATH.exists():
-        history = pd.read_csv(HISTORY_PATH, dtype={"prompt_version": str})
-        same_run = (history["model"] == model) & (history["prompt_version"] == prompt_version)
+        # Read versions as text: a hash like "12345678" would otherwise load as a number
+        history = pd.read_csv(HISTORY_PATH, dtype={"prompt_version": str, "labels_version": str})
+
+        # Rows saved before labels_version existed: we can't tell which labels they used
+        if "labels_version" not in history.columns:
+            position = history.columns.get_loc("prompt_version") + 1
+            history.insert(position, "labels_version", "unknown")
+
+        same_run = (
+            (history["model"] == model)
+            & (history["prompt_version"] == prompt_version)
+            & (history["labels_version"] == labels_ver)
+        )
         history = pd.concat([history[~same_run], new_row], ignore_index=True)
     else:
         history = new_row
@@ -341,6 +377,12 @@ def main():
         action="store_true",
         help="Also print every disagreement (they are always saved to CSV).",
     )
+    parser.add_argument(
+        "--labels",
+        type=Path,
+        default=LABELS_PATH,
+        help=f"Hand-labels CSV to score against (default: {LABELS_PATH}).",
+    )
     args = parser.parse_args()
 
     if args.list_runs:
@@ -348,9 +390,11 @@ def main():
         return
 
     model, prompt_version = choose_run(args.model, args.prompt_version)
+    labels_ver = labels_version(args.labels)
     print(f"Evaluating model {model}, prompt version {prompt_version}")
+    print(f"Against labels {args.labels} (labels version {labels_ver})")
 
-    merged, n_missing = load_data(model, prompt_version)
+    merged, n_missing = load_data(model, prompt_version, args.labels)
     results = evaluate_run(merged, n_missing)
 
     print_summary(results)
@@ -362,7 +406,7 @@ def main():
     print(theme_confusion_matrix(merged).to_string())
 
     disagreements = find_disagreements(merged)
-    disagreements_path = RAW_DIR / f"disagreements_{model}_{prompt_version}.csv"
+    disagreements_path = RAW_DIR / f"disagreements_{model}_{prompt_version}_{labels_ver}.csv"
     disagreements.to_csv(disagreements_path, index=False)
     print(f"\n{len(disagreements)} disagreements saved to {disagreements_path}")
 
@@ -377,7 +421,7 @@ def main():
             if row["notes"]:
                 print(f"  notes: {row['notes']}")
 
-    save_history(results, model, prompt_version)
+    save_history(results, model, prompt_version, labels_ver)
     print(f"Summary row saved to {HISTORY_PATH}")
 
 

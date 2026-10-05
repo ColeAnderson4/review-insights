@@ -18,9 +18,9 @@ f06fe376-ba00-454b-8e79-7c21f95c42c6,workday,beware because when a random person
 97829e91-a294-4b9b-bbff-c932c10a73aa,workday,The system works well. Easy to navigate. And seems reliable.,ui_navigation,positive,FALSE,,
 cc3fb136-1520-42eb-af48-4e3f2257aa2c,workday,its doing too much honestly the worst part about any job I've had that used it,negative_general,negative,FALSE,,Overcomplicatied UI?
 963abed1-cf16-415a-b9b2-24538a0a51e8,ukg_pro,This app is trash,negative_general,negative,FALSE,,
-92eb1e74-bf2a-45dd-88ce-1b42ce1d9308,ukg_pro,it works fine sometimes but when trying to bring up timesheets it takes a few minutes,timekeeping,neutral,FALSE,,
+92eb1e74-bf2a-45dd-88ce-1b42ce1d9308,ukg_pro,it works fine sometimes but when trying to bring up timesheets it takes a few minutes,timekeeping,negative,FALSE,,
 114ecb21-5e35-4907-9414-664c69816880,workday,the worst,negative_general,negative,FALSE,,
-536cffb7-62de-4709-9426-f030f842aef7,workday,im terminated,other,negative,FALSE,,
+536cffb7-62de-4709-9426-f030f842aef7,workday,im terminated,other,neutral,FALSE,,
 f9063edb-5ee7-4641-b155-987368079ede,ukg_pro,needs work. lots of buffering,performance,negative,FALSE,,
 f3aed981-365d-4b3e-afe0-38a1c5279ef8,ukg_pro,"Terrible experience. It takes so much effort to even get into the app. I have to scan my fingerprint, then a username and password and still a second confirmation. Secondly that confirmation comes through if im lucky, and app closes if I leave it even on accident. I'd prefer manual over this any day.",login_auth,negative,FALSE,,
 d90a9a5b-2689-4543-bd8d-ad853edce442,workday,the app sucks. in 2 years times it has forced me to change my password 10 times. it's constantly logging me out. if my work didn't require the use of this app I would never in a lifetime use it. by far the worst app ever.,login_auth,negative,FALSE,,
@@ -32,7 +32,7 @@ dba16895-9aff-4ddf-8cb1-aa6984dc3ad5,ukg_pro,terrible sistem!,negative_general,n
 f3ea0fc2-b2a3-435d-9f62-d4153c33b85c,ukg_pro,sometimes it slows down,performance,negative,FALSE,,
 18660939-8a4f-4a0b-84ef-99fac96ad8e6,ukg_pro,"App is very slow, sluggish at best and unresponsive at worst. I love having to signin multiple times just for the app to crash and start over just so I can have a chance at viewing work related schedule info.",performance,negative,FALSE,,"Repeat login, sarcasm"
 f05c1d15-2a87-45cf-94df-f95d0163ad55,workday,good to used,positive_general,positive,FALSE,,
-e4ef5c9e-eb65-42d3-977e-4eb0b3878687,ukg_pro,still a bit slow to log.,performance,negative,FALSE,,
+e4ef5c9e-eb65-42d3-977e-4eb0b3878687,ukg_pro,still a bit slow to log.,login_auth,negative,FALSE,,
 3391b8bb-8dd0-40ae-95bd-db52c5725a4f,workday,great app,positive_general,positive,FALSE,,
 6dc9f61b-c70c-42bc-8431-c7bffd95d54c,ukg_pro,"awful, it takes forever to log in and then it takes forever to load anything",performance,negative,FALSE,,
 30c8cdbc-822d-402c-a5f5-faea15b0f07c,workday,solid for switching jobs,positive_general,positive,FALSE,,
@@ -44,9 +44,9 @@ a64df85e-4482-4b01-a3f3-99764d3c159b,ukg_pro,"good app, although its kinds slow 
 d5b7fc3b-7533-4e76-96ae-e9b282357cfb,ukg_pro,This app is absolutely terrible. There is no way of updating personal info. You cannot put in more than one time request on the same day or you get an error message. You cannot easily request time off as the process for time seems to be backwards. Everything about this app seems designed to confuse and frustrate. Literally the WORST app I've ever used and I wish my company would go back to the old way and delete this garbage.,scheduling_pto,negative,FALSE,,"Unable to update personal information, confusing design"
 bd05a799-750d-4755-b5e4-c78271f84e84,workday,quick and easy,positive_general,positive,FALSE,,
 63d56147-c80b-4d74-81af-5836a9750109,ukg_pro,Horrendous UI. More inconvenient to make changes and adjust my schedule. And it constantly kicks me out to re sign in.,ui_navigation,negative,FALSE,,Signs out constantly
-b2a81c68-195f-468c-85dc-788a8ffc7daf,ukg_pro,"Really really really slow and unorganized. Looks too complicated for something that should be simple, neat and clean to use and navigate. NEEDS a complete redesign.",performance,negative,FALSE,,
+b2a81c68-195f-468c-85dc-788a8ffc7daf,ukg_pro,"Really really really slow and unorganized. Looks too complicated for something that should be simple, neat and clean to use and navigate. NEEDS a complete redesign.",ui_navigation,negative,TRUE,Complete app redesign that is simpler and cleaner,
 1916e2c0-9e5e-4351-94c1-ba027d9e551c,workday,easy peasy so far,positive_general,positive,FALSE,,
-9bf7da53-b21c-475a-9ae1-e1aca7f75c27,ukg_pro,"If I could give zero stars I would. Worst app I've ever used. Slow, convoluted, not intuitive at all.",performance,negative,FALSE,,UI is confusing
+9bf7da53-b21c-475a-9ae1-e1aca7f75c27,ukg_pro,"If I could give zero stars I would. Worst app I've ever used. Slow, convoluted, not intuitive at all.",ui_navigation,negative,FALSE,,UI is confusing
 772bcc0d-bcf1-4099-91ab-5f18b9231067,workday,Awesome,positive_general,positive,FALSE,,
 21c27410-fa30-4326-9fbe-60c1031f5bc6,ukg_pro,can't log on all of a sudden!!!The worst app,login_auth,negative,FALSE,,
 1ff7895d-3c99-4ffd-86a4-6dba3f729348,ukg_pro,I have to give a 1 star because I can't log in it's not allowing me to,login_auth,negative,FALSE,,
@@ -62,11 +62,11 @@ b1ee8878-036e-4593-b656-e02d084ba3ca,workday,I shouldn't have to change my phone
 49e50b7e-41b2-4be3-b58f-98c8fbf157bb,workday,good,positive_general,positive,FALSE,,
 099cd429-296c-4cb5-95db-bf65d54f1bcd,workday,Very informational and helpful,positive_general,positive,FALSE,,
 497637b3-8006-4959-bfd7-d1c7d15da117,workday,confusing on terms,ui_navigation,negative,FALSE,,
-3511c3e4-6eac-48df-8a21-6dbde1b97b70,ukg_pro,"this app sucks. super slow, convoluted layouts and I am unable to download paystubs through it. tried a number of ways and the file always corrupts. I hate that my job switched to this awful app",performance,negative,FALSE,,"ui issues, can't download paytubs"
-d1c64903-aa70-4c00-87b8-2e44b3e2785d,workday,easy to use,positive_general,negative,FALSE,,
+3511c3e4-6eac-48df-8a21-6dbde1b97b70,ukg_pro,"this app sucks. super slow, convoluted layouts and I am unable to download paystubs through it. tried a number of ways and the file always corrupts. I hate that my job switched to this awful app",pay,negative,FALSE,,"ui issues, can't download paytubs"
+d1c64903-aa70-4c00-87b8-2e44b3e2785d,workday,easy to use,positive_general,positive,FALSE,,
 b9312582-2e6e-4a95-a176-07bc99121ead,workday,they're taking out two many Taxis out of our pay without let us be aware,pay,negative,FALSE,,
 a24af703-1874-49c0-8225-0af09788c602,ukg_pro,"Terrible UI to view schedule, calendar and timecard",ui_navigation,negative,FALSE,,
-c3502bcc-fbc4-4d6a-a6ee-164f8dc20505,workday,very easy!,positive_general,negative,FALSE,,
+c3502bcc-fbc4-4d6a-a6ee-164f8dc20505,workday,very easy!,positive_general,positive,FALSE,,
 68f28aff-9bc5-450d-8292-d98c34f71346,workday,Can't reload app,performance,negative,FALSE,,
 5792cd51-db67-4058-8a6f-6b617439c2da,workday,takes 10 years to load each thing and then the page has an error and you have to start all over,performance,negative,FALSE,,
 db18c120-8a1c-4b76-8a6a-42d3dfcc5c98,workday,regularly logs me out then after verifying myself I will just get a blank screen. This will happen for days at a time and then one day it will randomly start working again. Terrible,login_auth,negative,FALSE,,Blank screen after log on 
@@ -88,7 +88,7 @@ f0651912-7470-488d-b399-7b6eaa7c637a,ukg_pro,Badly designed & even harder to nav
 6c909ec3-e493-414e-9611-b5154a5449ee,ukg_pro,"buggy,lagging, takes forever to open.",performance,negative,FALSE,,
 a053f146-2c08-4991-a071-cb14a64eaf8c,ukg_pro,Terrible. I reinstalled this app thinking I can log back in with my credentials without it switching me to another screen on my android. It keeps redirecting me to another window for some reason. I used to be able to log in w/o trouble. The app keeps me in limbo without ever logging in. Just a sad waste of time.,login_auth,negative,FALSE,,login redirect loop on android
 d4852010-3df7-4375-9baf-51861aaf0171,ukg_pro,"seriously buggy. I can sign in once or twice, then it tells me to make sure auto updates are on to stay in the loop... they already are. now I can't sign in to fix my team members punches.",login_auth,negative,FALSE,,
-484430f0-78d5-4bba-8f78-8d793b56a63e,workday,👌,positive_general,negative,FALSE,,
+484430f0-78d5-4bba-8f78-8d793b56a63e,workday,👌,positive_general,positive,FALSE,,
 d5e8bc72-47d7-498d-a40b-adc553a81912,workday,ici je me sens plus proche de l'entreprise pour lequelle je travail qui est le Club Med,positive_general,positive,FALSE,,french: Feels connected to the employer
 66d2017f-0d25-4286-84da-e9a96aa425d1,workday,very helpful app,positive_general,positive,FALSE,,
 3a09e6ad-c3d5-4668-b435-f966ea55c9ac,workday,easy!!,positive_general,positive,FALSE,,
@@ -97,5 +97,5 @@ e724a06d-f31d-41c8-a667-664d5e0bd54d,ukg_pro,I use biometrics and I still have t
 9e294af6-76a6-46f5-98ab-cbfb293e3d1b,workday,works great,positive_general,positive,FALSE,,
 7081f253-f16e-447e-8a03-797bb5120368,workday,App is totally worthless now removed paystub info even when logged in through corporate VPN HR needs to a provider with better app,pay,negative,FALSE,,paystub info removed
 389315c0-dbb6-442c-9bc3-523759ef4848,ukg_pro,"terrible, never let's me see the things I need to see but let's me see stuff I really don't care to see.",ui_navigation,negative,FALSE,,shows things that are unimportant
-8ad2cd6e-cac7-425f-b143-6ba762bbed9e,workday,"Great environment, friendly people",positive_general,positive,FALSE,,
+8ad2cd6e-cac7-425f-b143-6ba762bbed9e,workday,"Great environment, friendly people",other,positive,FALSE,,
 5529988d-1720-4539-950f-bd5bd7d723f3,workday,"Unable to save log in, unable to remember the device, slow, unresponsive. bad experience for an app you use extensively",login_auth,negative,FALSE,,unresponsive
