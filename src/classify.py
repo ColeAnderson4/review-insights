@@ -110,12 +110,14 @@ def find_bad_numbers(numbers, expected_count):
     Numbers outside 1..expected_count (e.g. 0 or 21 in a batch of 20) don't
     match any review, so ignore them here. The caller drops those results.
     """
-    # TODO (Cole): write this. Raising instead of `...` means a forgotten stub
-    # crashes loudly instead of silently returning None.
-    raise NotImplementedError("find_bad_numbers is not written yet")
+    bad = []
+    for n in range(1, expected_count + 1):
+        if numbers.count(n) != 1:
+            bad.append(n)
+    return bad
 
 
-INSTRUCTIONS ="""You classify Google Play reviews of HR and workforce mobile apps for a product manager.
+INSTRUCTIONS = """You classify Google Play reviews of HR and workforce mobile apps for a product manager.
 
 For each review, return:
 - theme: exactly one theme name from the Themes table
