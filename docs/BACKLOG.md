@@ -39,3 +39,4 @@ Copy each story onto a card in Trello or Jira. Set up four columns: **Backlog â†
 - **What didn't:**
 - **What I'd change next sprint:**
 - **Points planned vs. completed:**
+- **Process change:** Swapped US-5 before US-2 to avoid labeling bias.
