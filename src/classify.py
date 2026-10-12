@@ -24,6 +24,12 @@ from scrape import APPS, RAW_DIR
 GUIDE_PATH = Path("docs/LABELING_GUIDE.md")
 LABELS_PATH = Path("data/labels.csv")
 FAILURE_LOG = Path("logs/classify_failures.jsonl")
+WARNING_LOG = Path("logs/classify_warnings.jsonl")
+
+# The guide asks for 8 words or fewer. A summary a little over that (up to 12)
+# is kept and logged as a warning; only one over 12 words fails.
+MAX_SUMMARY_WORDS = 8
+HARD_MAX_SUMMARY_WORDS = 12
 
 # Columns of the output CSV, in order
 OUTPUT_COLUMNS = [
@@ -91,23 +97,31 @@ OUTPUT_SCHEMA = {
 
 
 def validate_result(item):
-    """Return a list of error strings for one review's result dict (empty list = valid)."""
-    errors = []
+    """Check one review's result dict.
 
-        # 1. Theme
+    Returns (errors, warnings), two lists of strings:
+        errors:   problems that make the result unusable. The review fails and is retried.
+        warnings: problems small enough to keep the result, e.g. a request_summary
+                  of 9-12 words. They are logged to WARNING_LOG.
+    Two empty lists mean the result is fully valid.
+    """
+    errors = []
+    warnings = []
+
+    # 1. Theme
     if item.get("theme") not in THEMES:
         errors.append(f"bad theme: {item.get('theme')!r}")
 
-       # 2. Sentiment
+    # 2. Sentiment
     if item.get("sentiment") not in SENTIMENTS:
         errors.append(f"bad sentiment: {item.get('sentiment')!r}")
 
-       # 3. is_feature_request must be a real True/False
+    # 3. is_feature_request must be a real True/False
     is_fr = item.get("is_feature_request")
     if not isinstance(is_fr, bool):
         errors.append(f"is_feature_request is not a boolean: {is_fr!r}")
 
-        # 4. request_summary rules
+    # 4. request_summary rules
     summary = item.get("request_summary")
     if not isinstance(summary, str):
         errors.append(f"request_summary is not a string: {summary!r}")
@@ -116,10 +130,16 @@ def validate_result(item):
             errors.append("request_summary should be empty when not a feature request")
         if is_fr is True:
             word_count = len(summary.split())
-            if word_count < 1 or word_count > 8:
-                errors.append(f"request_summary should be 1-8 words, got {word_count}")
+            if word_count < 1 or word_count > HARD_MAX_SUMMARY_WORDS:
+                errors.append(
+                    f"request_summary should be 1-{HARD_MAX_SUMMARY_WORDS} words, got {word_count}"
+                )
+            elif word_count > MAX_SUMMARY_WORDS:
+                warnings.append(
+                    f"request_summary is {word_count} words (target {MAX_SUMMARY_WORDS} or fewer)"
+                )
 
-    return errors
+    return errors, warnings
 
 
 def find_bad_numbers(numbers, expected_count):
@@ -358,17 +378,20 @@ def split_results(reply, reviews):
             continue
 
         item = items_by_number[number]
-        errors = validate_result(item)
+        errors, warnings = validate_result(item)
         if errors:
             failed.append({"review": review, "errors": errors})
             continue
 
+        # Warnings ride along with the row; classify_reviews logs them and
+        # removes them before the row is saved
         good.append({
             "review_id": review["review_id"],
             "theme": item["theme"],
             "sentiment": item["sentiment"],
             "is_feature_request": item["is_feature_request"],
             "request_summary": item["request_summary"],
+            "warnings": warnings,
         })
 
     return good, failed
@@ -463,6 +486,28 @@ def log_failures(failures, version):
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def log_warnings(warned, version):
+    """Append each kept-but-warned review to the warning log as one JSON object per line.
+
+    warned: list of {"review_id", "warnings", "request_summary"} dicts.
+    """
+    if not warned:
+        return
+
+    WARNING_LOG.parent.mkdir(parents=True, exist_ok=True)
+    with open(WARNING_LOG, "a", encoding="utf-8") as f:
+        for item in warned:
+            record = {
+                "time": datetime.now().isoformat(timespec="seconds"),
+                "model": MODEL,
+                "prompt_version": version,
+                "review_id": item["review_id"],
+                "warnings": item["warnings"],
+                "request_summary": item["request_summary"],
+            }
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
 def cost_in_dollars(usage):
     """Convert token counts to dollars using PRICES for the current MODEL."""
     input_price, output_price = PRICES[MODEL]
@@ -494,7 +539,7 @@ def classify_reviews(client, reviews, out_path):
     print(f"Model {MODEL}, prompt version {version}")
     print(f"{len(done_ids)} reviews already done, {len(records)} to classify in {n_batches} batches.")
 
-    summary = {"skipped": len(done_ids), "classified": 0, "failed": 0, "cost": 0.0}
+    summary = {"skipped": len(done_ids), "classified": 0, "failed": 0, "warned": 0, "cost": 0.0}
 
     for batch_number in range(n_batches):
         start = batch_number * BATCH_SIZE
@@ -508,8 +553,17 @@ def classify_reviews(client, reviews, out_path):
             app_by_id[review["review_id"]] = review["app"]
 
         rows = []
+        warned = []
         for result in results:
             row = dict(result)  # copy, so we don't change the dict classify_batch returned
+            # pop removes "warnings" from the row (it isn't a CSV column) and returns its value
+            warnings = row.pop("warnings")
+            if warnings:
+                warned.append({
+                    "review_id": row["review_id"],
+                    "warnings": warnings,
+                    "request_summary": row["request_summary"],
+                })
             row["app"] = app_by_id[result["review_id"]]
             row["model"] = MODEL
             row["prompt_version"] = version
@@ -517,9 +571,11 @@ def classify_reviews(client, reviews, out_path):
 
         append_rows(rows, out_path)
         log_failures(failures, version)
+        log_warnings(warned, version)
 
         summary["classified"] += len(results)
         summary["failed"] += len(failures)
+        summary["warned"] += len(warned)
         summary["cost"] += cost_in_dollars(usage)
         print(
             f"  Batch {batch_number + 1}/{n_batches}: {len(results)} ok, {len(failures)} failed. "
@@ -607,6 +663,7 @@ def main():
     print(f"  Already done (skipped): {summary['skipped']}")
     print(f"  Classified this run:    {summary['classified']}")
     print(f"  Failed this run:        {summary['failed']}")
+    print(f"  Warnings this run:      {summary['warned']}")
     if attempted > 0:
         print(f"  Failure rate:           {summary['failed'] / attempted:.1%}  (PRD target: under 2%)")
     print(f"  Cost this run:          ${summary['cost']:.3f}")
