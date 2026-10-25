@@ -33,6 +33,12 @@ Copy each story onto a card in Trello or Jira. Set up four columns: **Backlog â†
 | US-13 | As the builder, I want to act on that feedback so v1.1 is better. | Top 2 issues are fixed or logged as future work. | 2 |
 | US-14 | As a PM, I want to find themes the taxonomy missed. | Second LLM pass over "Other" reviews suggests new themes. *(Optional.)* | 3 |
 
+## Tech debt
+
+| ID | Item | Acceptance criteria | Pts |
+|---|---|---|---|
+| TD-1 | `check_labels.py` and `make_label_sample.py` keep their own copies of `THEMES`, `APPS`, `RAW_DIR`, and `LABELS_PATH`. A second theme list can drift from `docs/LABELING_GUIDE.md`. | Both scripts import these from `classify.py` / `scrape.py`; `check_labels.py` still passes on the current `labels.csv`. | 1 |
+
 ## Retro notes (fill in at the end of each sprint)
 
 - **What went well:**

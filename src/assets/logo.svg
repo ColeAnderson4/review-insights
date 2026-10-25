@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="32" viewBox="0 0 220 32">
+  <!-- Wordmark shown in the header bar by st.logo. An SVG used as an image can't load
+       web fonts, so this lists Inter first and falls back to common system fonts. -->
+  <!-- Bar-chart icon: three rounded bars of increasing height on a baseline. -->
+  <rect x="1" y="16" width="4" height="9" rx="1" fill="#9ca1aa"/>
+  <rect x="7" y="11" width="4" height="14" rx="1" fill="#9ca1aa"/>
+  <rect x="13" y="6" width="4" height="19" rx="1" fill="#f0efec"/>
+  <text x="26" y="22" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+        font-size="16" font-weight="600" fill="#f0efec">App Review Insights</text>
+</svg>

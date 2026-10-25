@@ -1,0 +1,23 @@
+[client]
+# "minimal" hides the Deploy button and the developer options in the top-right menu.
+toolbarMode = "minimal"
+
+[theme]
+base = "dark"
+backgroundColor = "#262624"            # warm muted gray page
+secondaryBackgroundColor = "#302f2d"   # widgets and tooltips (cards use the same shade)
+textColor = "#f0efec"                  # off-white
+primaryColor = "#c3cad6"               # accent, same light slate as the complaint charts
+borderColor = "#3d3c39"                # container borders
+# Load Inter from Google Fonts. Format is "<font name>:<CSS url>".
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+# Console-style headings: a small page title (st.title = h1) and short section labels
+# (st.subheader = h3). The list sets h1, h2, h3; the rest keep Streamlit's defaults.
+headingFontSizes = ["1.5rem", "1.125rem", "1rem"]
+headingFontWeights = [600, 600, 600]
+baseRadius = "0.5rem"
+
+# The sidebar (filters) is one shade darker than the page.
+[theme.sidebar]
+backgroundColor = "#1f1f1d"
+secondaryBackgroundColor = "#2a2a28"

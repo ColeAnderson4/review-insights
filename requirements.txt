@@ -1,7 +1,7 @@
-google-play-scraper
-anthropic
-python-dotenv
-pandas
-scikit-learn
-streamlit
-plotly
+google-play-scraper==1.2.7
+anthropic==1.11.0
+python-dotenv==1.2.4
+pandas==3.0.6
+scikit-learn==1.9.1
+streamlit==1.64.0
+plotly==7.1.0
