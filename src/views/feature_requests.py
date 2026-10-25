@@ -36,7 +36,6 @@ with st.container(border=True, key="card_requests"):
     for column, app_name in zip(request_columns, APP_ORDER):
         app_requests = requests[requests["app_name"] == app_name]
 
-        # Named aggregation: one output column per (input column, function) pair.
         # head(3) keeps the 3 newest summaries, since the data is sorted newest first.
         request_table = app_requests.groupby("theme_label").agg(
             requests=("review_id", "size"),

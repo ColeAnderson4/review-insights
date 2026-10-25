@@ -32,29 +32,25 @@ def sample_app(app_name):
 
 
 def main():
-    # --- Safety check ---
-    # If LABELS_PATH already exists, print a message saying so and stop the
-    # script without writing anything. Hint: Path.exists() and sys.exit().
+    # Never overwrite existing hand labels.
     if LABELS_PATH.exists():
         print(f"{LABELS_PATH} already exists. Refusing to overwrite your hand labels. Delete or rename it first if you really want a new sample.")
         sys.exit(1)
-    # 1. Sample each app separately so we get exactly 50 of each
+
+    # Sample each app separately to get exactly REVIEWS_PER_APP of each.
     samples = []
     for app_name in APPS:
         samples.append(sample_app(app_name))
 
-    # 2. Stack the samples, then shuffle so the apps are mixed together.
-    #    frac=1 means "sample 100% of the rows", which just reorders them.
+    # Shuffle so the two apps are mixed together while labeling.
     df = pd.concat(samples)
     df = df.sample(frac=1, random_state=RANDOM_STATE)
     df = df.reset_index(drop=True)
 
-    # 3. Keep only the columns needed for labeling and add empty label columns
     df = df[KEEP_COLUMNS]
     for column in LABEL_COLUMNS:
         df[column] = ""
 
-    # 4. Save and summarize
     df.to_csv(LABELS_PATH, index=False)
     counts = df["app"].value_counts()
     print(f"Wrote {len(df)} rows to {LABELS_PATH}:")

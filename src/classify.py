@@ -43,9 +43,9 @@ PRICES = {
     "claude-opus-5-5": (4.00, 20.00),
 }
 
-# One constant, so US-7 can compare models by changing a single line
+# Runs are keyed by model + prompt version, so changing this starts a separate run.
 MODEL = "claude-sonnet-5-5"
-EFFORT = "low"           # how much the model thinks before answering; low is enough for classification
+EFFORT = "low"           # thinking budget; low is enough for classification
 BATCH_SIZE = 20          # reviews per API call
 MAX_TOKENS = 8000        # room for thinking + about 20 x 50 tokens of JSON
 
@@ -70,8 +70,7 @@ THEMES = [
 ]
 SENTIMENTS = ["positive", "neutral", "negative"]
 
-# JSON schema for structured outputs: the API makes the model's reply match this shape.
-# "enum" means theme and sentiment can only be one of the listed values.
+# Structured outputs constrain the reply to this schema; validate_result still re-checks every field.
 OUTPUT_SCHEMA = {
     "type": "object",
     "properties": {
@@ -108,20 +107,17 @@ def validate_result(item):
     errors = []
     warnings = []
 
-    # 1. Theme
     if item.get("theme") not in THEMES:
         errors.append(f"bad theme: {item.get('theme')!r}")
 
-    # 2. Sentiment
     if item.get("sentiment") not in SENTIMENTS:
         errors.append(f"bad sentiment: {item.get('sentiment')!r}")
 
-    # 3. is_feature_request must be a real True/False
+    # Must be a real bool: the string "false" would be truthy.
     is_fr = item.get("is_feature_request")
     if not isinstance(is_fr, bool):
         errors.append(f"is_feature_request is not a boolean: {is_fr!r}")
 
-    # 4. request_summary rules
     summary = item.get("request_summary")
     if not isinstance(summary, str):
         errors.append(f"request_summary is not a string: {summary!r}")
@@ -192,7 +188,6 @@ def extract_section(guide_text, heading):
         if line.startswith(heading):
             inside_section = True
         elif inside_section and line.startswith("## "):
-            # Reached the next section, so stop
             break
 
         if inside_section:
@@ -216,7 +211,6 @@ def themes_from_guide():
     themes = []
     for line in themes_section.splitlines():
         if line.startswith("| `"):
-            # "| `login_auth` | ..." split on "`" -> ["| ", "login_auth", " | ..."]
             name = line.split("`")[1]
             themes.append(name)
 
@@ -262,18 +256,9 @@ def build_system_prompt():
 
 
 def prompt_version(system_prompt):
-    """Return a short fingerprint of the system prompt, used to tell runs apart.
+    """Return the first 8 hex characters of the prompt's SHA-256, used to tell runs apart.
 
-    Input:
-        system_prompt: the full prompt string from build_system_prompt().
-
-    Output:
-        The first 8 characters of the SHA-256 hex digest of the prompt,
-        e.g. "3f9a0c1e". The same prompt always gives the same version, and
-        any change to the guide's rules or INSTRUCTIONS gives a new one.
-
-    Hint: hashlib.sha256() takes bytes, not a string, so encode the string
-    first with .encode("utf-8"). .hexdigest() turns the hash into text.
+    Any change to INSTRUCTIONS or the guide's rule sections gives a new version.
     """
     return hashlib.sha256(system_prompt.encode("utf-8")).hexdigest()[:8]
 
@@ -424,12 +409,12 @@ def classify_batch(client, system_prompt, reviews):
         if not failed:
             break
 
-        # Retry only the reviews that failed. On the second pass, the loop ends.
+        # Retry only the reviews that failed.
         to_send = []
         for failure in failed:
             to_send.append(failure["review"])
 
-    # Whatever is still in `failed` after attempt 2 goes to the failure log (step 4)
+    # Reviews still failing after the retry are logged, not saved.
     failures = []
     for failure in failed:
         failures.append({
@@ -444,8 +429,8 @@ def classify_batch(client, system_prompt, reviews):
 def load_done_ids(out_path, model, version):
     """Return the set of review_ids already in out_path for this model and prompt version.
 
-    A different model or prompt version doesn't count as done, so US-7 runs
-    re-classify everything and add new rows next to the old ones.
+    A different model or prompt version doesn't count as done, so a new run
+    re-classifies everything and adds its rows next to the old ones.
     """
     if not out_path.exists():
         return set()
@@ -556,7 +541,7 @@ def classify_reviews(client, reviews, out_path):
         warned = []
         for result in results:
             row = dict(result)  # copy, so we don't change the dict classify_batch returned
-            # pop removes "warnings" from the row (it isn't a CSV column) and returns its value
+            # "warnings" isn't a CSV column
             warnings = row.pop("warnings")
             if warnings:
                 warned.append({

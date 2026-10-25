@@ -30,7 +30,7 @@ with st.container(border=True, key="card_method"):
 # ---------------------------------------------------------------------------
 # Accuracy results from data/eval_history.csv
 # ---------------------------------------------------------------------------
-# dtype=str keeps version codes like "19d83b15" as text instead of guessing a type.
+# Keep version hashes as text (e.g. "12345678" would load as a number).
 history = pd.read_csv(
     EVAL_HISTORY_PATH, dtype={"prompt_version": str, "labels_version": str}
 )
@@ -43,7 +43,6 @@ results["Sentiment agreement"] = 100 * results["sentiment_agreement"]
 results["Feature-request F1"] = results["fr_f1"]
 
 # Show original labels first, and the original prompt before the revised one.
-# list(...).index gives each version's position in the dicts above.
 results["label_order"] = results["labels_version"].map(list(LABEL_NAMES).index)
 results["prompt_order"] = results["prompt_version"].map(list(PROMPT_NAMES).index)
 results = results.sort_values(["label_order", "prompt_order"])

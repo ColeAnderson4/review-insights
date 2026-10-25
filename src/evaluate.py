@@ -60,24 +60,14 @@ def to_bool(values, file_name):
 
 
 def labels_version(path):
-    """Return a short fingerprint of a labels file, used to tell label versions apart.
+    """Return the first 8 hex characters of the file's SHA-256, used to tell label versions apart.
 
-    Input:
-        path: the labels CSV, e.g. data/labels.csv or a copy restored from git.
-
-    Output:
-        The first 8 characters of the SHA-256 hex digest of the file's bytes,
-        e.g. "3f9a0c1e". The same file always gives the same version, and any
-        edit to the file (even re-saving it in Excel) gives a new one.
-
-    Hint: Path(path).read_bytes() returns bytes, which hashlib.sha256() takes
-    directly, so unlike prompt_version there's no .encode() step. You'll need
-    to import hashlib.
+    Any edit to the file, even re-saving it in Excel, gives a new version.
     """
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:8]
 
+
 def load_data(model, prompt_version, labels_path):
-   
     """Join the hand labels to one run's LLM labels by review_id.
 
     Input:
@@ -105,8 +95,7 @@ def load_data(model, prompt_version, labels_path):
     if run["review_id"].duplicated().any():
         raise ValueError(f"Some review_ids appear more than once in this run of {CLASSIFIED_PATH}")
 
-    # how="inner" keeps only reviews in both tables (like SQL INNER JOIN).
-    # suffixes rename columns that exist in both: theme -> theme_hand, theme_llm.
+    # Inner join: reviews missing from the run are counted in n_missing instead.
     merged = labels.merge(
         run[LLM_COLUMNS],
         on="review_id",
@@ -142,7 +131,6 @@ def majority_baseline(merged, column):
     This is the score of a "model" that ignores the review text, so a real model
     is only useful to the extent that it beats this number.
     """
-    # normalize=True gives shares instead of counts; the first row is the most common
     shares = merged[column + "_hand"].value_counts(normalize=True)
     return shares.index[0], shares.iloc[0]
 
@@ -151,9 +139,6 @@ def feature_request_scores(merged):
     """Return precision, recall, F1 and the TP/FP/FN counts for is_feature_request.
 
     The hand label is the truth (y_true) and the LLM label is the prediction (y_pred).
-      precision = of the reviews the LLM flagged, how many really are requests
-      recall    = of the real requests, how many the LLM flagged
-      F1        = the harmonic mean of the two
     """
     y_true = merged["is_feature_request_hand"]
     y_pred = merged["is_feature_request_llm"]
@@ -163,7 +148,6 @@ def feature_request_scores(merged):
         "fr_precision": precision_score(y_true, y_pred, zero_division=0),
         "fr_recall": recall_score(y_true, y_pred, zero_division=0),
         "fr_f1": f1_score(y_true, y_pred, zero_division=0),
-        # & is "and" for each row; .sum() counts the True rows
         "fr_tp": int((y_true & y_pred).sum()),    # both say request
         "fr_fp": int((~y_true & y_pred).sum()),   # LLM says request, I don't
         "fr_fn": int((y_true & ~y_pred).sum()),   # I say request, LLM doesn't
@@ -176,11 +160,9 @@ def theme_confusion_matrix(merged):
 
     The diagonal is agreement. Off-diagonal cells show which themes get mixed up.
     """
-    # crosstab counts each (hand, llm) pair, like SQL GROUP BY theme_hand, theme_llm
     matrix = pd.crosstab(merged["theme_hand"], merged["theme_llm"])
 
-    # crosstab only includes themes that were used. reindex adds the rest as 0s
-    # and puts them in the guide's order, so every run's matrix has the same shape.
+    # Add unused themes as zeros, in guide order, so every run's matrix has the same shape.
     matrix = matrix.reindex(index=THEMES, columns=THEMES, fill_value=0)
     matrix.index.name = "hand \\ llm"
     matrix.columns.name = None
@@ -255,7 +237,7 @@ def print_summary(results):
     print(f"  {'':12}{'overall':>9}", end="")
     for app_name in APPS:
         print(f"{app_name:>10}", end="")
-    print(f"   baseline (always guess the most common label)")
+    print("   baseline (always guess the most common label)")
 
     for column in ["theme", "sentiment"]:
         print(f"  {column:12}{pct(results[column + '_agreement']):>9}", end="")
@@ -323,12 +305,6 @@ def save_history(results, model, prompt_version, labels_ver):
     if HISTORY_PATH.exists():
         # Read versions as text: a hash like "12345678" would otherwise load as a number
         history = pd.read_csv(HISTORY_PATH, dtype={"prompt_version": str, "labels_version": str})
-
-        # Rows saved before labels_version existed: we can't tell which labels they used
-        if "labels_version" not in history.columns:
-            position = history.columns.get_loc("prompt_version") + 1
-            history.insert(position, "labels_version", "unknown")
-
         same_run = (
             (history["model"] == model)
             & (history["prompt_version"] == prompt_version)

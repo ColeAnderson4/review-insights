@@ -76,8 +76,7 @@ def style_chart(fig, height, legend=True):
         # The right margin leaves room for the last tick label (e.g. "100%").
         margin=dict(l=0, r=20, t=top_margin, b=0),
         showlegend=legend,
-        # Legend in one row above the chart, lined up with the card's left edge.
-        # xref="container" measures x from the whole chart area, not the plot area.
+        # One row above the chart; xref="container" lines it up with the card's left edge.
         legend=dict(
             orientation="h", title_text="",
             x=0, xref="container", xanchor="left",
@@ -95,14 +94,13 @@ def section_header(label, finding):
     st.markdown(finding)
 
 
-# st.cache_data keeps the loaded DataFrame in memory, so the CSV is read once
-# instead of on every rerun (Streamlit reruns the page script on each interaction).
+# Cached because Streamlit reruns the page script on every interaction.
 @st.cache_data
 def load_reviews():
     df = pd.read_csv(DATA_PATH, parse_dates=["date"])
     df["app_name"] = df["app"].map(APP_NAMES)
     df["theme_label"] = df["theme"].map(THEME_LABELS)
-    # Number of words in each review: split on whitespace, then count the pieces.
+    # Used to sort by length and hide very short reviews.
     df["word_count"] = df["text"].str.split().str.len()
     return df
 

@@ -62,37 +62,16 @@ def fetch_reviews(app_id, target=TARGET_REVIEWS):
 
 
 def clean_reviews(raw, app_name):
-    """Turn raw review dicts into a DataFrame with only the columns we keep.
+    """Return the reviews as a DataFrame of allowlisted columns, one row per review_id.
 
-    Input:
-        raw: list of dicts from fetch_reviews(). Each dict has keys like
-             "reviewId", "userName", "userImage", "content", "score",
-             "thumbsUpCount", "at", "appVersion", and a few others.
-        app_name: short name from APPS, e.g. "ukg_pro".
-
-    Output:
-        A pandas DataFrame with exactly these columns, in this order:
-            review_id    <- reviewId
-            app          <- app_name (the same value on every row)
-            text         <- content
-            rating       <- score
-            thumbs_up    <- thumbsUpCount
-            date         <- at
-            app_version  <- appVersion (can be None; that's fine)
-
-    Rules:
-        - Build the rows from a whitelist of the keys above. Never copy
-          userName, userImage, or any other key.
-        - Drop duplicate review_id rows.
+    Columns are picked from an allowlist, so reviewer names and profile images
+    (userName, userImage) are never saved.
     """
     if not raw:
         raise ValueError(f"No reviews to clean for {app_name}. Check the app ID or try again later.")
     df = pd.DataFrame(raw)
-    
-    #1 Keep only the whitelisted keys
+
     keep = ["reviewId", "content", "score", "thumbsUpCount", "at", "appVersion"]
-    
-    #2 Rename to our column names
     df = df[keep]
     df = df.rename(columns={
         "reviewId": "review_id",
@@ -102,13 +81,8 @@ def clean_reviews(raw, app_name):
         "at": "date",
         "appVersion": "app_version",
     })
-    # 3. Add the app column
     df["app"] = app_name
-
-    # 4. Remove duplicate reviews
     df = df.drop_duplicates(subset=["review_id"])
-
-    # 5. Put columns in the order the docstring requires
     df = df[["review_id", "app", "text", "rating", "thumbs_up", "date", "app_version"]]
 
     return df

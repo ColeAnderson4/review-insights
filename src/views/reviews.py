@@ -39,7 +39,6 @@ with st.sidebar:
     sentiment_choice = st.multiselect(
         "Sentiment", SENTIMENT_ORDER, default=default_sentiments, placeholder="All sentiments"
     )
-    # A slider with a tuple value lets the user pick a range, e.g. 1 to 2 stars.
     lowest_rating, highest_rating = st.slider("Star rating", 1, 5, (1, 5))
     search = st.text_input("Search review text")
     show_short = st.toggle(f"Show reviews under {MIN_WORDS} words", value=False)
@@ -69,8 +68,7 @@ if not show_short:
 matches = matches.sort_values(["word_count", "date"], ascending=[False, False])
 
 # ---------------------------------------------------------------------------
-# "Load more": st.session_state remembers how many reviews to show between reruns.
-# When any filter changes, go back to the first page.
+# "Load more" paging. Reset to the first page whenever a filter changes.
 # ---------------------------------------------------------------------------
 current_filters = (
     app_choice, tuple(theme_choice), tuple(sentiment_choice),
@@ -103,7 +101,7 @@ else:
     st.caption(caption)
 
     for _, review in matches.head(shown).iterrows():
-        # Each review gets its own card; the key must be unique on the page.
+        # Keys must be unique on the page, hence the review_id.
         with st.container(border=True, key=f"card_review_{review['review_id']}"):
             stars = "★" * review["rating"] + "☆" * (5 - review["rating"])
             # Details line in muted caption text, so the review itself stands out.
@@ -111,7 +109,7 @@ else:
                 f"{stars} · {review['date']:%b %-d, %Y} · {review['app_name']} · "
                 f"{review['theme_label']} · {review['sentiment']}"
             )
-            # st.text shows the review exactly as written, without Markdown formatting.
+            # st.text, not st.markdown: review text shouldn't be rendered as Markdown.
             st.text(review["text"])
 
     if shown < len(matches):

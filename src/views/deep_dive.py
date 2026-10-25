@@ -10,7 +10,6 @@ from dashboard_common import (
 
 reviews = load_reviews()
 
-# Widgets created inside "with st.sidebar" appear in the sidebar instead of the page.
 with st.sidebar:
     app_name = st.radio("App", APP_ORDER)
 
@@ -40,7 +39,6 @@ with st.container(border=True, key="card_deep_dive"):
     )
     style_chart(chart, height=320, legend=False)
     # The same x-axis range for both apps, so switching apps doesn't rescale the bars.
-    # bargap is the space between bars as a fraction of each slot: higher = thinner bars.
     chart.update_layout(xaxis_range=shared_x_range(reviews), bargap=0.45)
     st.plotly_chart(chart, config=CHART_CONFIG)
 

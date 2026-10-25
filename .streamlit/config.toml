@@ -1,5 +1,3 @@
-# Streamlit reads this file automatically when you run `streamlit run` from the project root.
-
 [client]
 # "minimal" hides the Deploy button and the developer options in the top-right menu.
 toolbarMode = "minimal"

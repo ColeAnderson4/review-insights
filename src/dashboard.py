@@ -17,12 +17,9 @@ LOGO_PATH = Path(__file__).parent / "assets" / "logo.svg"
 GITHUB_URL = "https://github.com/ColeAnderson4"
 LINKEDIN_URL = "https://www.linkedin.com/in/coleanderson-"
 
-# Wide layout uses the full browser width. This must be the first st. call.
-# An int for initial_sidebar_state sets the sidebar's starting width in pixels.
+# Must be the first st. call. An int initial_sidebar_state sets the sidebar width in pixels.
 st.set_page_config(page_title="App Review Insights", layout="wide", initial_sidebar_state=240)
 
-# st.logo puts the "App Review Insights" wordmark at the left of the header bar,
-# next to the page links from st.navigation(position="top").
 st.logo(str(LOGO_PATH), size="large")
 
 # Shared CSS. The theme has no settings for these, so they're styled here:
@@ -44,8 +41,7 @@ st.html(
 """
 )
 
-# st.Page points at a script; paths are relative to this file.
-# url_path sets the page's address, e.g. localhost:8501/reviews.
+# Paths are relative to this file.
 pages = [
     st.Page("views/overview.py", title="Overview", default=True),
     st.Page("views/deep_dive.py", title="App deep dive", url_path="deep-dive"),
@@ -54,8 +50,7 @@ pages = [
     st.Page("views/method.py", title="Method & validation", url_path="method"),
 ]
 
-# position="top" puts the page menu in a bar across the top. The sidebar then only
-# appears on pages that put something in it (the deep dive and reviews filters).
+# Top nav bar, so the sidebar only appears on pages that use it (the filters).
 current_page = st.navigation(pages, position="top")
 current_page.run()
 
